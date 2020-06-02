@@ -24,6 +24,7 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "stdbool.h"
 #include "usbd_custom_hid_if.h"
 extern USBD_HandleTypeDef hUsbDeviceFS;
 /* USER CODE END Includes */
@@ -99,6 +100,48 @@ int main(void)
 	  uint16_t steering;
       uint16_t buttons;
   };
+
+  bool clock_one_bit()
+  {
+	  bool result = HAL_GPIO_ReadPin(GPIOB, Controller_Data_Pin);
+	  HAL_GPIO_WritePin(GPIOB, Controller_Clock_Pin, RESET); //-_
+	  //HAL_Delay(1);
+	  HAL_GPIO_WritePin(GPIOB, Controller_Clock_Pin, SET); //-_-
+	  HAL_Delay(7);
+	  return result;
+  }
+
+  uint16_t get_controller_register()
+  {
+	  uint16_t controller_register = 0;
+	  uint8_t counter = 15;
+
+	  //build 2 sets of 8 bits
+	  for (uint8_t i = 0; i < 2; i++)
+	  {
+		  //global clock gets a pulse
+		  HAL_GPIO_WritePin(GPIOB, Global_Clock_Pin, SET); //_-
+		  //HAL_Delay(1);
+		  HAL_GPIO_WritePin(GPIOB, Global_Clock_Pin, RESET); //_-_
+		  //HAL_Delay(1);
+
+		  //take a reading of first bit
+
+		  for (uint8_t j = 0; j < 8; j++)
+		  {
+			  //clock out 8 bits
+			  controller_register |= clock_one_bit() << counter--;
+		  }
+	  }
+	  return ~controller_register;
+  }
+
+  //Setup default pin states for 3-pin controller
+
+  HAL_GPIO_WritePin(GPIOB, Global_Clock_Pin, RESET);
+  HAL_GPIO_WritePin(GPIOB, Controller_Clock_Pin, SET);
+
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
@@ -111,7 +154,17 @@ int main(void)
 	  HAL_ADC_PollForConversion(&hadc1, 100);
 
 	  gamepadReport.steering = HAL_ADC_GetValue(&hadc1);
-	  gamepadReport.buttons = 0b1111000010101011;
+
+	  if (get_controller_register() == 0b0100000001000000)
+	  {
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, RESET);
+		  gamepadReport.buttons = 0b0000000000000001;
+	  }
+	  else
+	  {
+		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, SET);
+		  gamepadReport.buttons = 0b0000000000000000;
+	  }
 
 	  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, &gamepadReport, sizeof(struct gamepad_report_t));
 
@@ -222,25 +275,36 @@ static void MX_GPIO_Init(void)
   GPIO_InitTypeDef GPIO_InitStruct = {0};
 
   /* GPIO Ports Clock Enable */
+  __HAL_RCC_GPIOC_CLK_ENABLE();
   __HAL_RCC_GPIOD_CLK_ENABLE();
   __HAL_RCC_GPIOA_CLK_ENABLE();
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOB, GPIO_PIN_0|GPIO_PIN_1, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, GPIO_PIN_RESET);
 
-  /*Configure GPIO pins : PB0 PB1 */
-  GPIO_InitStruct.Pin = GPIO_PIN_0|GPIO_PIN_1;
+  /*Configure GPIO pin Output Level */
+  HAL_GPIO_WritePin(GPIOB, Global_Clock_Pin|Controller_Clock_Pin, GPIO_PIN_RESET);
+
+  /*Configure GPIO pin : PC13 */
+  GPIO_InitStruct.Pin = GPIO_PIN_13;
+  GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
+  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
+  HAL_GPIO_Init(GPIOC, &GPIO_InitStruct);
+
+  /*Configure GPIO pins : Global_Clock_Pin Controller_Clock_Pin */
+  GPIO_InitStruct.Pin = Global_Clock_Pin|Controller_Clock_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
 
-  /*Configure GPIO pin : PB2 */
-  GPIO_InitStruct.Pin = GPIO_PIN_2;
+  /*Configure GPIO pin : Controller_Data_Pin */
+  GPIO_InitStruct.Pin = Controller_Data_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOB, &GPIO_InitStruct);
+  HAL_GPIO_Init(Controller_Data_GPIO_Port, &GPIO_InitStruct);
 
 }
 
