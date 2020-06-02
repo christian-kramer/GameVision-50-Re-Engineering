@@ -11208,7 +11208,7 @@ int main(void)
  8004360:	f24f 03ab 	movw	r3, #61611	; 0xf0ab
  8004364:	80fb      	strh	r3, [r7, #6]
 
-	  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, &gamepadReport, 4);
+	  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, &gamepadReport, sizeof(struct gamepad_report_t));
  8004366:	1d3b      	adds	r3, r7, #4
  8004368:	2204      	movs	r2, #4
  800436a:	4619      	mov	r1, r3

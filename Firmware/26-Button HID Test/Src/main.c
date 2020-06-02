@@ -108,7 +108,7 @@ int main(void)
 	  gamepadReport.steering = 1099;
 	  gamepadReport.buttons = 0b1111000010101011;
 
-	  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, &gamepadReport, 4);
+	  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, &gamepadReport, sizeof(struct gamepad_report_t));
 
     /* USER CODE END WHILE */
 
