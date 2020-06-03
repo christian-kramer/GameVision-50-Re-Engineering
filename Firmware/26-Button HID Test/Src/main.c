@@ -95,6 +95,18 @@ int main(void)
   MX_USB_DEVICE_Init();
   MX_ADC1_Init();
   /* USER CODE BEGIN 2 */
+
+  uint16_t button_codes[8] = {
+	  0b1000000010000000,
+	  0b0100000001000000,
+	  0b0010000000100000,
+	  0b0001000000010000,
+	  0b0000100000001000,
+	  0b0000010000000100,
+	  0b0000001000000010,
+	  0b0000000100000001
+  };
+
   struct gamepad_report_t
   {
 	  uint16_t steering;
@@ -105,9 +117,8 @@ int main(void)
   {
 	  bool result = HAL_GPIO_ReadPin(GPIOB, Controller_Data_Pin);
 	  HAL_GPIO_WritePin(GPIOB, Controller_Clock_Pin, RESET); //-_
-	  //HAL_Delay(1);
 	  HAL_GPIO_WritePin(GPIOB, Controller_Clock_Pin, SET); //-_-
-	  HAL_Delay(7);
+	  HAL_Delay(1);
 	  return result;
   }
 
@@ -121,9 +132,7 @@ int main(void)
 	  {
 		  //global clock gets a pulse
 		  HAL_GPIO_WritePin(GPIOB, Global_Clock_Pin, SET); //_-
-		  //HAL_Delay(1);
 		  HAL_GPIO_WritePin(GPIOB, Global_Clock_Pin, RESET); //_-_
-		  //HAL_Delay(1);
 
 		  //take a reading of first bit
 
@@ -149,12 +158,35 @@ int main(void)
   while (1)
   {
 	  struct gamepad_report_t gamepadReport;
+	  //gamepadReport.buttons = 0;
 
 	  HAL_ADC_Start(&hadc1);
 	  HAL_ADC_PollForConversion(&hadc1, 100);
 
 	  gamepadReport.steering = HAL_ADC_GetValue(&hadc1);
 
+	  uint16_t controller_register = get_controller_register();
+	  //gamepadReport.buttons = controller_register;
+
+	  gamepadReport.buttons = 0;
+	  for (int i = 0; i < (sizeof(button_codes) / 2); i++)
+	  {
+		  //gamepadReport.buttons |= 1 << i;
+
+
+		  if (controller_register && controller_register & button_codes[i])
+		  {
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, RESET);
+			  gamepadReport.buttons |= 1 << i;
+		  }
+		  else
+		  {
+			  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, SET);
+		  }
+
+	  }
+
+	  /*
 	  if (get_controller_register() == 0b0100000001000000)
 	  {
 		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, RESET);
@@ -165,6 +197,7 @@ int main(void)
 		  HAL_GPIO_WritePin(GPIOC, GPIO_PIN_13, SET);
 		  gamepadReport.buttons = 0b0000000000000000;
 	  }
+	  */
 
 	  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, &gamepadReport, sizeof(struct gamepad_report_t));
 
