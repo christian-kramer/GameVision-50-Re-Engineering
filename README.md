@@ -47,8 +47,31 @@ Woah! That's a lot of Russian. I can read some Russian, but not stuff that's thi
 
 That's better. Looks like it's actually pretty straightforward. Dendy DW-MH-3? I've never heard of the company "Dendy Processors" before. I really want to know more about this chip.
 
+Googling the company "Dendy Processors" led me to this Wikipedia page:
 
-VCC gets +5v, OUT0 is a common clock, SCK1 and SCK2 are clocks specific to each controller, and P1D0/P2D0 are the lines that the controllers transmit data on.
+![Dendy Page](https://i.imgur.com/gEAXmYE.png)
+
+Holy cow! "Dendy" was actually a Soviet NES clone! This project just got *really* interesting. I guess technically now I'm reverse-engineering 80's-vintage Soviet tech.
+
+This makes a lot of sense now, because studying the board more I notice the oscillator's frequency is very familiar:
+
+![oscillator](https://i.imgur.com/09LDseW.png?1)
+
+The frequency indicated on this oscillator is 21.4772 MHz... Check out what we get when we google this frequency.
+
+![results](https://i.imgur.com/3eGZG3F.png)
+
+It's all NES/SNES stuff! Ha!
+
+That last link is interesting, too. The *reason* 21.4772 MHz is used is because that's the sample rate for 525-line B-MAC video encoding.
+
+![BMAC](https://i.imgur.com/W12nYeU.png)
+
+70's/80's video encoding standards are absolutely fascinating, and I highly encourage you to explore this rabbit hole if you're interested. The Wikipedia article on B-MAC  is a great starting point with tons of links that will take you further.
+
+![Wikipedia](https://i.imgur.com/t1ZDlsw.png)
+
+Back to the project at hand! The Russian Dendy documentation page indicates VCC gets +5v, OUT0 is a common clock, SCK1 and SCK2 are clocks specific to each controller, and P1D0/P2D0 are the lines that the controllers transmit data on.
 
 
 I've got a logic analyzer I can hook up to this and see if I can recognize a pattern.
