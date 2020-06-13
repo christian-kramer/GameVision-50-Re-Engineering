@@ -4,6 +4,8 @@ ___
 
 I've been definitely been looking in strange places for personal projects to do, lately. During my search I stumbled upon an old all-in-one game console/controller I used to play with when I was young.
 
+This project is a continuation and implementation of my [STM32F103C8T6-Familiarization repo](https://github.com/christian-kramer/STM32F103C8T6-Familiarization)
+
 ![GameVision 50](https://i.imgur.com/y6f7k1Y.jpg)
 
 It's called the **GameVision 50**, presumably because it has 50 games.
