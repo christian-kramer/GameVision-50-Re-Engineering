@@ -135,7 +135,7 @@ I had this resistor sitting in my "loose parts" bowl on my workbench. It measure
 
 Lastly, here it is all assembled. I repurposed the 3-wire Audio/Video ribbon cable for the potentiometer, and it all works great! Steering is super smooth, and all of the buttons work!
 
-I'm glad I incorporated the test-point pin header, next to the controller connector. Initially during writing the firmware where I was getting some weird data I had never encountered before, and being able to easily connect a logic analyzer to inspect my signals allowed me to easily pinpoint the issue of the P1D0 not being pulled back up to +5V! Enabling the STM32's internal pull-up resistor on that pin in software allowed me to fix the issue without even needing a hardware fix.
+I'm glad I incorporated the test-point pin header, next to the controller connector. Initially, during writing the firmware, I was getting some weird data I had never encountered before. When I pressed a button, my PC indicated many other buttons being pressed as well! To me, this looked like a timing issue... But I wasn't entirely sure where in my program the issue could be. Being able to easily connect a logic analyzer to inspect my signals allowed me to easily pinpoint the issue of "**P1D0**" not being pulled back up to +5V! This "floating" appeared as additional button presses to the STM32. Enabling the STM32's internal pull-up resistor on that pin in software allowed me to fix the issue without even needing a hardware fix.
 
 After that, I closed it up and loaded up some games to try it out with!
 
