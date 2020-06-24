@@ -102,3 +102,43 @@ After I got it talking with my PC and being recognized as a "Game Pad" in Window
 
 
 I decided to keep the same shape and general layout as the original mainboard so that it may be a drop-in replacement/conversion. It felt much more professional, that way. Additionally, I broke out the steering wheel connector into test-points so that I may easily connect my logic analyzer in the event that I needed to debug my firmware in the future. The header for that is labeled J4, to the left of J5: the controller connector.
+
+![Delivered PCB](https://i.imgur.com/uCSjS30l.jpg?)
+
+When the boards finally arrived, I was ecstatic about how they turned out! The "Gamevision" logo looks amazing, and all of the tiny capacitors and resistors were soldered perfectly. I opted to have the surface-mount components assembled at the factory due to the amount of fine-pitch soldering I would otherwise have to do myself. The only surface-mount component the factory couldn't do was the USB port, which was easy enough for me to hand-solder.
+
+![Side-by-side](https://i.imgur.com/TeE7PdM.jpg)
+
+Here you can see my board (left) vs. the old board (right). You can see how similar they are physically, but it also really gives you an idea of just how much more component-dense the old board is compared to mine. Lots of analog signals going on over there!
+
+![Layered](https://i.imgur.com/u1Snjdyl.jpg?1)
+
+Here's another comparison view showing how I incorporated the existing JST-XH-7 connector into my design. Because I retained the same connector in the same location, the wheel plugs right in like it was made for it!
+
+![Empty](https://i.imgur.com/NDdaOEVl.jpg?1)
+
+Now, to tackle this empty shell. That potentiometer in the middle will need to be reworked in order to work the way I want it to. Let's take a closer look to see why.
+
+![close-up](https://i.imgur.com/kTBZffxl.jpg?1)
+
+Right now there's a big ol' glob of solder connecting the wiper pin with ground, making the potentiometer act like a variable resistor. This is then hooked up to the wheel's control board, which senses if the wheel is turned left or right, and registers a "left" or "right" button-press accordingly.
+
+This doesn't work for what we want it to do! We want to measure *how far* the wheel is turned left or right, not "if". For that, we need to connect this potentiometer up to the  PCB directly so the STM32 can read the analog signal, and not the wheel. But, if we disconnect the potentiometer from the two wires and just leave them hanging, we'll forever get a "right" button press due to the infinite resistance!
+
+We need to trick the wheel into thinking the potentiometer is always in the center. I measured 4.7KΩ across the potentiometer in the "center" positon, so an approximately 4.7KΩ fixed resistor soldered to the wires should be a perfect stand-in.
+
+![Junk resistor](https://i.imgur.com/MbjsLXM.jpg)
+
+I had this resistor sitting in my "loose parts" bowl on my workbench. It measured something like 3.7KΩ, so close enough. After I soldered it on... no more "right" button press coming from the controller!
+
+![Put Together](https://i.imgur.com/VcXucp5l.jpg?1)
+
+Lastly, here it is all assembled. I repurposed the 3-wire Audio/Video ribbon cable for the potentiometer, and it all works great! Steering is super smooth, and all of the buttons work!
+
+I'm glad I incorporated the test-point pin header, next to the controller connector. Initially during writing the firmware where I was getting some weird data I had never encountered before, and being able to easily connect a logic analyzer to inspect my signals allowed me to easily pinpoint the issue of the P1D0 not being pulled back up to +5V! Enabling the STM32's internal pull-up resistor on that pin in software allowed me to fix the issue without even needing a hardware fix.
+
+After that, I closed it up and loaded up some games to try it out with!
+
+Here is a video of me showing the wheel in action, playing Euro Truck Simulator 2:
+
+[https://i.imgur.com/FMJOuTz.mp4](https://i.imgur.com/FMJOuTz.mp4)
