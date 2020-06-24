@@ -27,11 +27,11 @@ The games aren't exactly sophisticated... not quite the level of immersion I'm l
 
 Let's open it up and have a look.
 
-![Opened](https://i.imgur.com/zB3j0u8.jpg)
+![Opened](https://i.imgur.com/zB3j0u8l.jpg)
 
 Seems a lot less complicated than I thought it would be, actually. Let's take a closer look at that mainboard.
 
-![Close-up](https://i.imgur.com/Eze8Wvi.jpg)
+![Close-up](https://i.imgur.com/Eze8Wvil.jpg)
 
 Interesting layout, for sure. The big chip on the right is almost certainly a parallel flash IC, the chip-on-board in the lower-left is probably the main game processor (more on that in a bit), and quite honestly I have no idea what the "chip-on-board, on-board" thing in the top left is. It's gotta be a coprocessor of some sort, because it's thoroughly interconnected with both the game chip, and the flash chip. A converter between parallel flash and whatever interface the game processor requires, perhaps?
 
