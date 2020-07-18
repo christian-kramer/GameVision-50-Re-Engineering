@@ -1,0 +1,17 @@
+http://xn----ctbgeuhdtdb2b.xn--p1ai/price/dendy/?parts&d=DW-MH-3
+
+1. Open console
+2. Google pin names
+3. DW-MH-3 http://xn----ctbgeuhdtdb2b.xn--p1ai/price/dendy/?parts&d=DW-MH-3
+4. Dendy Console https://en.wikipedia.org/wiki/Dendy_(console)
+
+https://dl3.pushbulletusercontent.com/ZLbrwJPoP9Q7nNgH2fFISxheJo8OG3El/temp.png
+
+https://dl3.pushbulletusercontent.com/ZetwpJihSo75LvyZ02aG3gFb86TO28rc/temp.png
+
+5. Probe pins, OUT0 SCK P1D0
+6. Write down codes for each button, realize there's some that share codes
+
+Step voltage up to 5v on steering wheel, increase timing
+
+Document "turbo" buttons

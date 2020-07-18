@@ -24,7 +24,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-
+#include "stdbool.h"
+#include "usbd_custom_hid_if.h"
+extern USBD_HandleTypeDef hUsbDeviceFS;
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -94,12 +96,94 @@ int main(void)
   MX_USB_DEVICE_Init();
   /* USER CODE BEGIN 2 */
 
+  uint16_t button_codes[8] = {
+	  0b1000000010000000,
+	  0b0100000001000000,
+	  0b0010000000100000,
+	  0b0001000000010000,
+	  0b0000100000001000,
+	  0b0000010000000100,
+	  0b0000001000000010,
+	  0b0000000100000001
+  };
+
+  struct gamepad_report_t
+  {
+	  uint16_t steering;
+      uint16_t buttons;
+  };
+
+  bool clock_one_bit()
+  {
+	  bool result = HAL_GPIO_ReadPin(GPIOA, Controller_Data_Pin);
+	  HAL_GPIO_WritePin(GPIOA, Controller_Clock_Pin, RESET); //-_
+	  HAL_GPIO_WritePin(GPIOA, Controller_Clock_Pin, SET); //-_-
+	  HAL_Delay(1);
+	  return result;
+  }
+
+  uint16_t get_controller_register()
+  {
+	  uint16_t controller_register = 0;
+	  uint8_t counter = 15;
+
+	  //build 2 sets of 8 bits
+	  for (uint8_t i = 0; i < 2; i++)
+	  {
+		  //global clock gets a pulse
+		  HAL_GPIO_WritePin(GPIOA, Global_Clock_Pin, SET); //_-
+		  HAL_GPIO_WritePin(GPIOA, Global_Clock_Pin, RESET); //_-_
+
+		  //take a reading of first bit
+
+		  for (uint8_t j = 0; j < 8; j++)
+		  {
+			  //clock out 8 bits
+			  controller_register |= clock_one_bit() << counter--;
+		  }
+	  }
+	  return ~controller_register;
+  }
+
+  //Setup default pin states for 3-pin controller
+
+  HAL_GPIO_WritePin(GPIOA, Global_Clock_Pin, RESET);
+  HAL_GPIO_WritePin(GPIOA, Controller_Clock_Pin, SET);
+
   /* USER CODE END 2 */
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
   while (1)
   {
+	  struct gamepad_report_t gamepadReport;
+	  //gamepadReport.buttons = 0;
+
+	  HAL_ADC_Start(&hadc1);
+	  HAL_ADC_PollForConversion(&hadc1, 100);
+
+	  gamepadReport.steering = HAL_ADC_GetValue(&hadc1);
+
+	  uint16_t controller_register = get_controller_register();
+	  //gamepadReport.buttons = controller_register;
+
+	  gamepadReport.buttons = 0;
+	  for (int i = 0; i < (sizeof(button_codes) / 2); i++)
+	  {
+		  //gamepadReport.buttons |= 1 << i;
+		  if (controller_register && controller_register & button_codes[i])
+		  {
+			  gamepadReport.buttons |= 1 << i;
+		  }
+	  }
+
+	  //Handle "Reset" Button
+	  if (HAL_GPIO_ReadPin(GPIOB, RESET_Pin) == 0)
+	  {
+		  gamepadReport.buttons |= 1 << 8;
+	  }
+
+	  USBD_CUSTOM_HID_SendReport(&hUsbDeviceFS, &gamepadReport, sizeof(struct gamepad_report_t));
     /* USER CODE END WHILE */
 
     /* USER CODE BEGIN 3 */
@@ -213,7 +297,7 @@ static void MX_GPIO_Init(void)
   __HAL_RCC_GPIOB_CLK_ENABLE();
 
   /*Configure GPIO pin Output Level */
-  HAL_GPIO_WritePin(GPIOA, OUT0_Pin|SCK1_Pin|SCK2_Pin, GPIO_PIN_RESET);
+  HAL_GPIO_WritePin(GPIOA, Global_Clock_Pin|Controller_Clock_Pin|SCK2_Pin, GPIO_PIN_RESET);
 
   /*Configure GPIO pin : Mode_Pin */
   GPIO_InitStruct.Pin = Mode_Pin;
@@ -221,23 +305,29 @@ static void MX_GPIO_Init(void)
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   HAL_GPIO_Init(Mode_GPIO_Port, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : OUT0_Pin SCK1_Pin SCK2_Pin */
-  GPIO_InitStruct.Pin = OUT0_Pin|SCK1_Pin|SCK2_Pin;
+  /*Configure GPIO pins : Global_Clock_Pin Controller_Clock_Pin SCK2_Pin */
+  GPIO_InitStruct.Pin = Global_Clock_Pin|Controller_Clock_Pin|SCK2_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
   GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
   HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
 
-  /*Configure GPIO pins : P1D0_Pin P2D0_Pin */
-  GPIO_InitStruct.Pin = P1D0_Pin|P2D0_Pin;
+  /*Configure GPIO pin : Controller_Data_Pin */
+  GPIO_InitStruct.Pin = Controller_Data_Pin;
+  GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
+  HAL_GPIO_Init(Controller_Data_GPIO_Port, &GPIO_InitStruct);
+
+  /*Configure GPIO pin : P2D0_Pin */
+  GPIO_InitStruct.Pin = P2D0_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
   GPIO_InitStruct.Pull = GPIO_NOPULL;
-  HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+  HAL_GPIO_Init(P2D0_GPIO_Port, &GPIO_InitStruct);
 
   /*Configure GPIO pin : RESET_Pin */
   GPIO_InitStruct.Pin = RESET_Pin;
   GPIO_InitStruct.Mode = GPIO_MODE_INPUT;
-  GPIO_InitStruct.Pull = GPIO_NOPULL;
+  GPIO_InitStruct.Pull = GPIO_PULLUP;
   HAL_GPIO_Init(RESET_GPIO_Port, &GPIO_InitStruct);
 
 }

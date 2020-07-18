@@ -1,0 +1,21 @@
+questions I have:
+
+1. pull-up resistor on D+ to 5v, or 3.3v?
+2. USB trace layout? Interference on ground plane?
+3. oscillator layout?
+4. analog trace for potentiometer layout? USB/8mhz oscillator interference?
+5. 1M resistor on oscillator?
+6. oscillator capacitor value/0403 size? other parameters I didn't consider?
+7. 4.7k resistor on APX803S-29SA-7?
+8. AMS1117 decoupling?
+
+next steps:
+
+1. export SMD assembly files in accordance with JLCPCB
+2. add signature
+3. add info
+4. add board markings for no trash etc
+5. add GameVision 50 logo
+/6. create CubeMX project for pinout with labels
+7. during which, manually follow every connection back to chip to ensure feasibilty for gpio/analog
+8. check pinouts of headers and ensure they are accurate

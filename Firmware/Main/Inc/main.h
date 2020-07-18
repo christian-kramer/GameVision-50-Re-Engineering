@@ -60,12 +60,12 @@ void Error_Handler(void);
 /* Private defines -----------------------------------------------------------*/
 #define Mode_Pin GPIO_PIN_13
 #define Mode_GPIO_Port GPIOC
-#define OUT0_Pin GPIO_PIN_3
-#define OUT0_GPIO_Port GPIOA
-#define SCK1_Pin GPIO_PIN_4
-#define SCK1_GPIO_Port GPIOA
-#define P1D0_Pin GPIO_PIN_5
-#define P1D0_GPIO_Port GPIOA
+#define Global_Clock_Pin GPIO_PIN_3
+#define Global_Clock_GPIO_Port GPIOA
+#define Controller_Clock_Pin GPIO_PIN_4
+#define Controller_Clock_GPIO_Port GPIOA
+#define Controller_Data_Pin GPIO_PIN_5
+#define Controller_Data_GPIO_Port GPIOA
 #define P2D0_Pin GPIO_PIN_6
 #define P2D0_GPIO_Port GPIOA
 #define SCK2_Pin GPIO_PIN_7
